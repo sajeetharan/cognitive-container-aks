@@ -1,0 +1,54 @@
+#
+# Deploy Azure Cognitive Service Text Analytics (Sentiment Analysis) as a container
+# 
+# ------------------- Deployment ------------------- #
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: sentiment
+  labels:
+    app: sentiment-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sentiment-app
+  template:
+    metadata:
+      labels:
+        app: sentiment-app
+    spec:
+      containers:
+      - name: sentiment-pods
+        image: mcr.microsoft.com/azure-cognitive-services/textanalytics/sentiment
+        ports:
+        - containerPort : 5000        
+        env:       
+        - name: Eula
+          value: accept
+        - name: Billing
+          value: https://sl-mct-summit.cognitiveservices.azure.com/
+        - name: ApiKey
+          value: e02e869c045d4e2eb233ea773d6aa5b8
+        resources:
+          requests:
+            memory: 2Gi
+            cpu: 1
+          limits:
+            memory: 4Gi
+            cpu: 1
+
+---
+# ------------------- Internal Cluster IP ------------------- #
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentiment
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 5000
+  selector:
+    app: sentiment-app
